@@ -1,0 +1,11 @@
+wasterfinder/Lib/
+__pycache__/
+*.pyd
+*.dll
+*.lib
+*.exe
+*.so
+*.zip
+*.tar
+*.tar.gz
+*.whl
