@@ -1,4 +1,4 @@
-wasterfinder/Lib/
+wastefinder/Lib/
 __pycache__/
 *.pyd
 *.dll
