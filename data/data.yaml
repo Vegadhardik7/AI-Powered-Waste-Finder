@@ -1,0 +1,6 @@
+train: ../train/images
+val: ../validate/images
+
+nc: 3
+
+names: ["cardboard", "glass", "metal"]
