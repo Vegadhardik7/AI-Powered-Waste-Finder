@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s]: %(message)s:')
-
+ 
 project_name = "WasteDetection"
 
 # important files for CI/CD deployment
