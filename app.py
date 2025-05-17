@@ -1,10 +1,5 @@
-from WasteDetection.logger import logging
-from WasteDetection.exception import AppException
+from WasteDetection.pipeline.training_pipeline import TrainPipeline
 
-# logging.info("*** Starting Custom Logs ***")
+object = TrainPipeline()
 
-try:
-    x = 5/0
-    print(x)
-except Exception as e:
-    raise AppException(e)
+object.run_pipeline()

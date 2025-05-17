@@ -4,6 +4,7 @@ __pycache__/
 *.dll
 *.lib
 *.exe
+*.log
 *.so
 *.zip
 *.tar
