@@ -1,6 +1,7 @@
 import os
 import sys
 import gdown
+import shutil
 import zipfile
 from WasteDetection.logger import logging
 from WasteDetection.exception import AppException
@@ -14,32 +15,70 @@ class DataIngestion:
         except Exception as e:
             raise AppException(e)
         
-    def download_data(self)-> str:
+    def download_data(self) -> str:
         """
-        Fetch data from the URL
+        Fetch data from the URL, extract it, and move contents into feature_store folder.
+        Avoids redundant downloads or extractions.
         """
-
         try:
             dataset_url = self.data_ingestion_config.data_download_url
             zip_download_dir = self.data_ingestion_config.data_ingestion_dir
             os.makedirs(zip_download_dir, exist_ok=True)
+
             data_file_name = "waste-data-updated.zip"
             zip_file_path = os.path.join(zip_download_dir, data_file_name)
-            logging.info(f"Downloading data from {dataset_url} into file {zip_file_path}")
+            feature_store_dir = os.path.join(zip_download_dir, "feature_store")
+            extracted_folder = os.path.join(zip_download_dir, "waste-data-updated")
 
-            # Correctly extract the file ID
-            file_id = dataset_url.split("/d/")[1].split("/")[0]
-            logging.info(f"Extracted file ID: {file_id}")
+            # Skip download if ZIP file already exists
+            if not os.path.exists(zip_file_path):
+                logging.info(f"Downloading data from {dataset_url} into file {zip_file_path}")
+                file_id = dataset_url.split("/d/")[1].split("/")[0]
+                gdown_url = f"https://drive.google.com/uc?id={file_id}"
+                gdown.download(gdown_url, zip_file_path, quiet=False)
+                logging.info(f"Downloaded data into: {zip_file_path}")
+            else:
+                logging.info(f"ZIP file already exists at: {zip_file_path}, skipping download.")
 
-            # Use the correct URL format for gdown
-            gdown_url = f"https://drive.google.com/uc?id={file_id}"
-            gdown.download(gdown_url, zip_file_path, quiet=False)
-            logging.info(f"Downloaded data from {dataset_url} into file {zip_file_path}")
+            # Extract if folder doesn't already exist
+            if not os.path.exists(extracted_folder):
+                with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
+                    zip_ref.extractall(zip_download_dir)
+                    logging.info(f"Extracted zip file to: {zip_download_dir}")
+            else:
+                logging.info(f"Extraction folder already exists at: {extracted_folder}, skipping extraction.")
+
+            # Create feature_store dir if not exists
+            os.makedirs(feature_store_dir, exist_ok=True)
+
+            # Move contents if not already moved
+            if os.path.exists(extracted_folder):
+                for item in os.listdir(extracted_folder):
+                    source_path = os.path.join(extracted_folder, item)
+                    dest_path = os.path.join(feature_store_dir, item)
+                    if not os.path.exists(dest_path):  # prevent overwrite
+                        shutil.move(source_path, dest_path)
+                        logging.info(f"Moved: {item} → {feature_store_dir}")
+                    else:
+                        logging.info(f"Skipped moving {item}, already exists in feature_store.")
+                # Remove extracted_folder after move
+                shutil.rmtree(extracted_folder)
+                logging.info(f"Removed folder: {extracted_folder}")
+            else:
+                logging.info(f"No extracted folder found at: {extracted_folder}, skipping move.")
+
+            # Clean redundant inner folder if somehow created
+            redundant_folder = os.path.join(feature_store_dir, "waste-data-updated")
+            if os.path.exists(redundant_folder):
+                shutil.rmtree(redundant_folder)
+                logging.info(f"Removed redundant folder: {redundant_folder}")
 
             return zip_file_path
-        
+
         except Exception as e:
             raise AppException(e)
+
+
         
 
     def extract_zip_file(self, zip_file_path:str)->str:
