@@ -73,12 +73,25 @@ class DataIngestion:
                 shutil.rmtree(redundant_folder)
                 logging.info(f"Removed redundant folder: {redundant_folder}")
 
+            # Modify the content of data.yaml
+            data_yaml_path = os.path.join(feature_store_dir, "data.yaml")
+            if os.path.exists(data_yaml_path):
+                with open(data_yaml_path, 'w') as yaml_file:
+                    yaml_file.write("train: ../artifacts/data_ingestion/feature_store/train/images\n")
+                    yaml_file.write("val: ../artifacts/data_ingestion/feature_store/valid/images\n")
+                    yaml_file.write("nc: 2\n")
+                    yaml_file.write("names: ['glass', 'metal']\n")
+                logging.info(f"Modified content of data.yaml at: {data_yaml_path}")
+
+            # Make a copy of data.yaml in the current directory
+            if os.path.exists(data_yaml_path):
+                shutil.copy(data_yaml_path, "./")
+                logging.info(f"Copied data.yaml to current directory.")
+
             return zip_file_path
 
         except Exception as e:
             raise AppException(e)
-
-
         
 
     def extract_zip_file(self, zip_file_path:str)->str:

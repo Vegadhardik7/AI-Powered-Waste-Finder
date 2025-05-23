@@ -16,4 +16,4 @@ WasteDetection/logger/__init__.py
 WasteDetection/pipeline/__init__.py
 WasteDetection/pipeline/training_pipeline.py
 WasteDetection/utils/__init__.py
-WasteDetection/utils/main.py
+WasteDetection/utils/main_utils.py

@@ -1,0 +1,4 @@
+train: ../artifacts/data_ingestion/feature_store/train/images
+val: ../artifacts/data_ingestion/feature_store/valid/images
+nc: 2
+names: ['glass', 'metal']
